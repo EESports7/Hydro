@@ -9,6 +9,8 @@ There exists mainly **2 types** of botters, ones who bot levels on the ILL and o
 ## Structure
 
 Version 1.0.0
+
+Files should end in ".hydro"
 ### Header (Metadata)
 ```
 std::string magicNumber = "H2OGMD";                // 
