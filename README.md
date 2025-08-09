@@ -5,7 +5,7 @@
 > I might make a FAQ section if I feel the need to.   
 > If you have any questions, feel free to make an issue request.   
 
-There exists mainly **2 types** of botters, ones who bot levels on the ILL and ones who bot levels like [Suffer](https://www.youtube.com/watch?v=Hq45gXcHfoE). This format is designed for the latter because as macro size increases, so does parsing time to a noticeable amount. This is easily solved by using possibly the simplest macro structure possible, also allowing easy multithreading. This format accounts for [GDR metadata](https://github.com/maxnut/GDReplayFormat/tree/gdr2?tab=readme-ov-file#replay) along with a few new features to QOL features. If you bot levels casually, I recommend using [Oxy](https://github.com/EESports7/Oxy) instead because many of Hydro's advantages are useless at lower macro sizes.
+There exists mainly **2 types** of botters, ones who bot levels on the ILL and ones who bot levels like [Suffer](https://www.youtube.com/watch?v=Hq45gXcHfoE). This format is designed for the latter because as macro size increases, so does parsing time to a noticeable amount. This is easily solved by using possibly the simplest macro structure possible, also allowing easy multithreading. This format accounts for [GDR metadata](https://github.com/maxnut/GDReplayFormat/tree/gdr2?tab=readme-ov-file#replay) along with a few new features. If you bot levels casually, I recommend using [Oxy](https://github.com/EESports7/Oxy) instead because many of Hydro's advantages are useless at lower macro sizes.
 ## Structure
 
 Version 1.0.0
