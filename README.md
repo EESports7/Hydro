@@ -106,8 +106,6 @@ uint8_t input;      // When encoded, the variable size depends if platformer mod
 
 ## Input Values
 
-Which number corresponds to which input
-
 | Number | Action                      |
 | ------ | --------------------------- |
 | 0      | Player 1 Jump Click         |
