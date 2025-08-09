@@ -5,7 +5,7 @@
 > I might make a FAQ section if I feel the need to.   
 > If you have any questions, feel free to make an issue request.   
 
-There exists mainly **2 types** of botters, ones who bot levels on the ILL and ones who bot levels like [Suffer](https://www.youtube.com/watch?v=Hq45gXcHfoE). This format is designed for the latter because as macro size increases, so does parsing time to a noticeable amount. This is easily solved by using possibly the simplest macro structure possible, also allowing easy multithreading. This format accounts for GDR metadata along with a few new features to QOL features. If you bot levels casually, I recommend using [Oxy](https://github.com/EESports7/Oxy) instead because many of Hydro's advantages are useless at lower macro sizes.
+There exists mainly **2 types** of botters, ones who bot levels on the ILL and ones who bot levels like [Suffer](https://www.youtube.com/watch?v=Hq45gXcHfoE). This format is designed for the latter because as macro size increases, so does parsing time to a noticeable amount. This is easily solved by using possibly the simplest macro structure possible, also allowing easy multithreading. This format accounts for [GDR metadata](https://github.com/maxnut/GDReplayFormat/tree/gdr2?tab=readme-ov-file#replay) along with a few new features to QOL features. If you bot levels casually, I recommend using [Oxy](https://github.com/EESports7/Oxy) instead because many of Hydro's advantages are useless at lower macro sizes.
 ## Structure
 
 Version 1.0.0
@@ -15,7 +15,7 @@ Files should end in ".hydro"
 ```
 std::string magicNumber = "H2OGMD";                // 
 h2o::SemVar hydroVersion = h2o::SemVer(1,0,0);     // 
-uint32_t errorCheck;                               // Uses CRC32 for integrity checks
+uint32_t errorCheck;                               // Uses CRC32 on macro data for integrity checks
 
 std::string macroName;                             // 
 std::string macroCreator;                          // 
@@ -30,10 +30,11 @@ std::string levelName;                             //
 uint32_t levelID;                                  // 
 
 uint64_t replayTime;                               // Contains the time it takes to replay the entire macro
+uint64_t totalFrames;                              // Contains the total amount of frames elapsed
 
 uint32_t deathCount;                               // Contains how many times the intentional death feature is used
 
-uint32_t p1InputCount;                             // 
+uint32_t p1InputCount;                             // Shouldn't contain TPS changes, deaths, or physic changes
 uint32_t p2InputCount;                             // 
 
 std::vector<int32_t> seeds;                        // If there is only one seed, that seed will be use for all attempts
@@ -131,3 +132,4 @@ Which number corresponds to which input
 [GDR](https://github.com/maxnut/GDReplayFormat/tree/gdr2) - Despite its flaws, it is the first successful universal format with lots of metadata   
 [SLC](https://github.com/silicate-bot/slc) - Very amazing format that balances size and performance   
 any format that used compression (e.g. [Rush - LZMA](http://discord.gg/Pj9nyfTMWh), [OBot - LZMA](https://discord.com/invite/2PaSqR92Dv), RBot - Gzip) - Honestly the most underrated feature I have ever seen used   
+[ZCB](https://github.com/zeozeozeo/zcb3) - Great source of public domain macro encoders/decoders   
