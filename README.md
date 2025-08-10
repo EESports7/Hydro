@@ -45,7 +45,7 @@ uint16_t bitmask;                                  // Information can be found b
 This should be the only data compressed if compression is used
 
 ```
-std::vector<int32_t> seeds;                        // If there is only one seed, that seed will be use for all attempts
+std::vector<int32_t> seeds;                  // If there is only one seed, that seed will be use for all attempts
 std::vector<PlayerPos> playerSpawn;          // First position is the starting position, contains where the player spawns for each attempt on replay
 std::vector<double> tps;                     // First TPS is the starting TPS
 
