@@ -49,7 +49,7 @@ std::vector<int32_t> seeds;                  // If there is only one seed, that 
 std::vector<PlayerPos> playerSpawn;          // First position is the starting position, contains where the player spawns for each attempt on replay
 std::vector<double> tps;                     // First TPS is the starting TPS
 
-std::vector<InputPair> pairs;                //
+std::vector<InputPair> playerInputs;         //
 
 // These variables should only be read if indicated by the bitmask
 uint8_t physicsFreq = 1;                     // Defaults to 1
