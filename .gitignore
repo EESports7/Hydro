@@ -1,6 +1,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/vs,c++,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=vs,c++,cmake
 
+# Ignore build folders
+**/build
+# Ignore platform specific build folders
+build-*/
+
 ### C++ ###
 # Prerequisites
 *.d
