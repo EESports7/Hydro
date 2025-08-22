@@ -14,7 +14,7 @@
     Use for reference only
     Not intended for actual use
 
-    Currently doesn't support Zstandard
+    Currently doesn't support LZMA
 */
 
 namespace h2o{
