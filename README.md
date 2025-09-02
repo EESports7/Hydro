@@ -14,7 +14,7 @@ Files should end in ".hydro"
 ### Header (Metadata)
 ```
 std::string magicNumber = "H2OGMD";                // 
-h2o::SemVar hydroVersion = h2o::SemVer(1,1,0);     // 
+h2o::SemVar hydroVersion = h2o::SemVer(1,1,1);     // 
 uint32_t errorCheck;                               // Uses CRC32 on macro data for integrity checks
 
 std::string macroName;                             // 
