@@ -8,7 +8,7 @@
 There exists mainly **2 types** of botters, ones who bot levels on the ILL and ones who bot levels like [Suffer](https://www.youtube.com/watch?v=Hq45gXcHfoE). This format is designed for the latter because as macro size increases, so does parsing time to a noticeable amount. This is easily solved by using possibly the simplest macro structure possible, also allowing easy multithreading. This format accounts for [GDR metadata](https://github.com/maxnut/GDReplayFormat/tree/gdr2?tab=readme-ov-file#replay) along with a few new features. If you bot levels casually, I recommend using [Oxy](https://github.com/EESports7/Oxy) instead because many of Hydro's advantages are useless at lower macro sizes.
 ## Structure
 
-Version 1.1.0
+Version 1.1.1
 
 Files should end in ".hydro"
 ### Header (Metadata)
@@ -46,7 +46,6 @@ This should be the only data compressed if compression is used
 
 ```
 std::vector<int32_t> seeds;                  // If there is only one seed, that seed will be use for all attempts
-std::vector<PlayerPos> playerSpawn;          // First position is the starting position, contains where the player spawns for each attempt on replay
 std::vector<double> tps;                     // First TPS is the starting TPS
 
 std::vector<InputPair> playerInputs;         //
@@ -80,12 +79,6 @@ uint16_t major;
 uint16_t minor;
 uint16_t patch;
 std::string prNote;
-```
-
-### h2o::PlayerPos
-```
-double xPos;
-double yPos;
 ```
 
 ### h2o::PhysicsState

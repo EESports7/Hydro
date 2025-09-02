@@ -74,17 +74,6 @@ namespace h2o{
         }
     };
 
-    struct PlayerPos{
-        double xPos;
-        double yPos;
-
-        PlayerPos() = default;
-        PlayerPos(double x, double y){
-            xPos = x;
-            yPos = y;
-        }
-    };
-
     struct PhysicsState{
         double xPos;
         double yPos;
@@ -104,7 +93,7 @@ namespace h2o{
 
     constinit std::array<uint8_t,6> magicNumber = {0x48,0x32,0x4F,0x47,0x4D,0x44};
 
-    const SemVer hydroVersion = SemVer(1,1,0);
+    const SemVer hydroVersion = SemVer(1,1,1);
 
     class Replay{
         uint32_t maxDelta = 0;
@@ -132,7 +121,6 @@ namespace h2o{
         uint16_t bitmask = 0;
 
         std::vector<int32_t> seeds;
-        std::vector<PlayerPos> playerSpawn;
         std::vector<double> tps = {0.0};
 
         std::vector<InputPair> playerInputs;
@@ -205,10 +193,6 @@ namespace h2o{
                 playerInputs.emplace_back(frame,static_cast<uint8_t>(InputType::TPSCHANGE));
                 tps.emplace_back(TPS);
             }
-        }
-
-        void addSpawnpoint(double x, double y){
-            playerSpawn.emplace_back(x,y);
         }
 
         void addInput(uint64_t frame, uint8_t input){
@@ -450,11 +434,6 @@ namespace h2o{
                 macroStream << i;
             }
             
-            macroStream << static_cast<uint32_t>(playerSpawn.size());
-            for(const auto& i : playerSpawn){
-                macroStream << i.xPos << i.yPos;
-            }
-            
             macroStream << static_cast<uint32_t>(tps.size());
             for(const auto& i : tps){
                 macroStream << i;
@@ -614,13 +593,6 @@ namespace h2o{
                 seeds.emplace_back(readFile.readBits(32));
             }
 
-            temp = readFile.readBits(32);
-            for(uint32_t i = 0; i < temp; i++){
-                double xPos = readFile.readDouble();
-                double yPos = readFile.readDouble();
-                playerSpawn.emplace_back(xPos,yPos);
-            }
-
             tps.pop_back(); // remove initial zero
             temp = readFile.readBits(32);
             for(uint32_t i = 0; i < temp; i++){
@@ -672,11 +644,6 @@ namespace h2o{
                 macroStream << static_cast<uint32_t>(seeds.size());
                 for(const auto& i : seeds){
                     macroStream << i;
-                }
-                
-                macroStream << static_cast<uint32_t>(playerSpawn.size());
-                for(const auto& i : playerSpawn){
-                    macroStream << i.xPos << i.yPos;
                 }
                 
                 macroStream << static_cast<uint32_t>(tps.size());
@@ -768,7 +735,6 @@ namespace h2o{
         uint16_t viewBitmask(){ return bitmask; }
         
         std::vector<int32_t> viewSeeds(){ return seeds; }
-        std::vector<PlayerPos> viewPlayerSpawn(){ return playerSpawn; }
         std::vector<double> viewTPS(){ return tps; }
         std::vector<InputPair> viewInputBlock(){ return playerInputs; }
         uint8_t viewPhysicsFreq(){ return physicsFreq; }
