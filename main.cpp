@@ -44,16 +44,29 @@ void plainToHydro(){
 }
 
 void exportMacro(){
+    std::string macroName;
+    std::cout << "\n" << "Macro Name: ";
+    std::getline(std::cin >> std::ws,macroName); // 
+    
+    std::string plat;
+    std::cout << "\n" << "Platformer? (y/n): ";
+    std::cin >> plat;
+
     std::string cleanMacro;
     std::cout << "\n" << "Clean Macro/Remove Redunant Releases (y/n): ";
     std::cin >> cleanMacro;
     
     if(cleanMacro == "y"){ globalReplay.cleanMacro(); }
+
+    if(plat == "y"){
+        globalReplay.configurePlatformer(true);
+    }else{
+        globalReplay.configurePlatformer(false);
+    }
     
-    globalReplay.calculateInputCount();
     globalReplay.prepareDeltaVector();
     
-    uint8_t exportLog = globalReplay.exportFile();
+    uint8_t exportLog = globalReplay.exportFile(macroName);
     switch (exportLog){
         case 0:
         std::cout << "\nMacro Has Been Exported \n\n";
@@ -104,11 +117,7 @@ void importMacro(){
 
 void testMacro(){
     globalReplay = h2o::Replay();
-    globalReplay.macroMetadata("Friend List Challenge","EESports","this is the first ever hydro macro");
-    globalReplay.levelMetadata("Friend List Challeng",70823189,false,false,false,false,false);
-    globalReplay.botMetadata("xdBot",h2o::SemVer(2,4,0));
     globalReplay.changeTPS(240);
-    globalReplay.timeMetadata(5163,1239);
     
     using InputType = h2o::InputType;
     globalReplay.addInput(49,InputType::P1JUMPCLICK);
@@ -136,10 +145,9 @@ void testMacro(){
     globalReplay.addInput(1226,InputType::P1JUMPCLICK);
     globalReplay.addInput(1239,InputType::P1JUMPREL);
     
-    globalReplay.calculateInputCount();
     globalReplay.prepareDeltaVector();
 
-    uint8_t exportLog = globalReplay.exportFile();
+    uint8_t exportLog = globalReplay.exportFile("Friend List Challenge");
     switch (exportLog){
     case 0:
         std::cout << "\nTest Macro Has Been Exported And Loaded Into Memory\n\n";
@@ -151,23 +159,8 @@ void testMacro(){
 }
 
 void viewMacroSnippet(){
-    std::cout << "\n" << "Macro Name: " << globalReplay.viewMacroName() << "\n"
-    << "Macro Creator: " << globalReplay.viewMacroCreator() << "\n"
-    << "Macro Description: " << globalReplay.viewMacroDescription() << "\n"
-    << "Game Version: " << globalReplay.viewGameVersion() << "\n"
-    << "Bot Name: " << globalReplay.viewBotName() << "\n"
-    << "Bot Version: " 
-    << globalReplay.viewBotVersion().major 
-    << "." << globalReplay.viewBotVersion().minor
-    << "." << globalReplay.viewBotVersion().patch
-    << globalReplay.viewBotVersion().prNote << "\n"
-    << "Level Name: " << globalReplay.viewLevelName() << "\n"
-    << "Level ID: " << globalReplay.viewLevelID() << "\n"
-    << "Replay Time: " << globalReplay.viewReplayTime() << " ms\n"
-    << "Total Frames: " << globalReplay.viewTotalFrames() << " frames\n"
-    << "Death Count: " << globalReplay.viewDeathCount() << " deaths\n"
-    << "Player 1 Input Count: " << globalReplay.viewP1InputCount() << " inputs\n"
-    << "Player 2 Input Count: " << globalReplay.viewP2InputCount() << " inputs\n"
+    std::cout << "\n"
+    << "Player 2 Input Count: " << globalReplay.viewInputBlock().size() << " inputs\n"
     << "Raw Hydro Bitmask: " << std::bitset<16>(globalReplay.viewBitmask()) << "\n\n";
 
     std::cout << "Initial TPS: " << globalReplay.viewTPS()[0] << " TPS\n\n";
@@ -234,66 +227,6 @@ void viewMacroSnippet(){
     }
 }
 
-void editMetadata(){
-    std::string mName, mCreator, mDescription;
-    std::cout << "\n" << "Macro Name: ";
-    std::getline(std::cin >> std::ws,mName);
-    std::cout << "\n" << "Macro Creator: ";
-    std::getline(std::cin >> std::ws,mCreator);
-    std::cout << "\n" << "Macro Description (n for none): ";
-    std::getline(std::cin >> std::ws,mDescription);
-    if(mDescription == "n"){ mDescription = ""; }
-    globalReplay.macroMetadata(mName,mCreator,mDescription);
-    
-    std::string lvlName, lvlID, temp;
-    std::cout << "\n" << "Level Name: ";
-    std::getline(std::cin >> std::ws,lvlName);
-    std::cout << "\n" << "Level ID: ";
-    std::getline(std::cin >> std::ws,lvlID);
-    
-    std::string botName, verMajor, verMinor, verPatch, verPRNote;
-    std::cout << "\n" << "Bot Name: ";
-    std::getline(std::cin >> std::ws,botName);
-    std::cout << "\n" << "Bot Version Major: ";
-    std::getline(std::cin >> std::ws,verMajor);
-    std::cout << "\n" << "Bot Version Minor: ";
-    std::getline(std::cin >> std::ws,verMinor);
-    std::cout << "\n" << "Bot Version Patch: ";
-    std::getline(std::cin >> std::ws,verPatch);
-    std::cout << "\n" << "Bot Version Pre-Release Note (n for none): ";
-    std::getline(std::cin >> std::ws,verPRNote);
-    if(verPRNote == "n"){ verPRNote = ""; }
-    globalReplay.botMetadata(botName,h2o::SemVer(std::stoi(verMajor),std::stoi(verMinor),std::stoi(verPatch),verPRNote));
-    
-    bool LDM, platformer, coin1, coin2, coin3;
-    LDM = platformer = coin1 = coin2 = coin3 = false;
-    std::cout << "\n" << "Low Detail Mode (y/n): ";
-    std::getline(std::cin >> std::ws,temp);
-    if(temp == "y"){ LDM = true; temp = ""; }
-    std::cout << "\n" << "Platformer Mode (y/n): ";
-    std::getline(std::cin >> std::ws,temp);
-    if(temp == "y"){ platformer = true; temp = ""; }
-    std::cout << "\n" << "Coin 1 Collected (y/n): ";
-    std::getline(std::cin >> std::ws,temp);
-    if(temp == "y"){ coin1 = true; temp = ""; }
-    std::cout << "\n" << "Coin 2 Collected (y/n): ";
-    std::getline(std::cin >> std::ws,temp);
-    if(temp == "y"){ coin2 = true; temp = ""; }
-    std::cout << "\n" << "Coin 3 Collected (y/n): ";
-    std::getline(std::cin >> std::ws,temp);
-    if(temp == "y"){ coin3 = true; temp = ""; }
-    globalReplay.levelMetadata(lvlName,std::stoi(lvlID),LDM,platformer,coin1,coin2,coin3);
-    
-    std::string replayTime, totalFrames;
-    std::cout << "\n" << "Replay Time (ms): ";
-    std::getline(std::cin >> std::ws,replayTime);
-    std::cout << "\n" << "Total Frames: ";
-    std::getline(std::cin >> std::ws,totalFrames);
-    globalReplay.timeMetadata(std::stoi(replayTime),std::stoi(totalFrames));
-
-    std::cout << "\n\n" << "Metadata Editing Complete" << "\n\n";
-}
-
 void clearMemory(){
     globalReplay = h2o::Replay();
     std::cout << "\n" << "Memory Has Been Cleared" << "\n\n";
@@ -309,8 +242,7 @@ int main(){
         << "3. Import Hydro Macro\n"
         << "4. Hydro Test Macro\n"
         << "5. List Macro Metadata & 50 Inputs\n"
-        << "6. Edit Metadata (Header)\n"
-        << "7. Clear Memory\n"
+        << "6. Clear Memory\n"
         << "\n";
 
         std::string option;
@@ -337,9 +269,6 @@ int main(){
             viewMacroSnippet();
             break;
         case 6:
-            editMetadata();
-            break;
-        case 7:
             clearMemory();
             break;
         default:

@@ -9,7 +9,7 @@
 #include "util.hpp"
 
 /*
-    Reference Encoder/Decoder For Hydro v1.1.0
+    Reference Encoder/Decoder For Hydro v2.0.0
 
     Use for reference only
     Not intended for actual use
@@ -63,14 +63,12 @@ namespace h2o{
         uint16_t major;
         uint16_t minor;
         uint16_t patch;
-        std::string prNote;
 
         SemVer() = default;
-        SemVer(uint16_t a, uint16_t b, uint16_t c, std::string d = ""){
+        SemVer(uint16_t a, uint16_t b, uint16_t c){
             major = a;
             minor = b;
             patch = c;
-            prNote = d;
         }
     };
 
@@ -93,30 +91,10 @@ namespace h2o{
 
     constinit std::array<uint8_t,6> magicNumber = {0x48,0x32,0x4F,0x47,0x4D,0x44};
 
-    const SemVer hydroVersion = SemVer(1,1,1);
+    const SemVer hydroVersion = SemVer(2,0,0);
 
     class Replay{
         uint32_t maxDelta = 0;
-
-        std::string macroName = "";
-        std::string macroCreator = "";
-        std::string macroDescription = "";
-
-        uint32_t gameVersion = 22074;
-
-        std::string botName = "";
-        SemVer botVersion;
-
-        std::string levelName = "";
-        uint32_t levelID;
-
-        uint64_t replayTime = 0;
-        uint64_t totalFrames = 0;
-
-        uint32_t deathCount = 0;
-
-        uint32_t p1InputCount = 0;
-        uint32_t p2InputCount = 0;
 
         uint16_t bitmask = 0;
 
@@ -130,43 +108,13 @@ namespace h2o{
         std::vector<PhysicsState> player1States;
         std::vector<PhysicsState> player2States;
     public:
-        void macroMetadata(std::string name, std::string creator, std::string description = ""){
-            macroName = name;
-            macroCreator = creator;
-            macroDescription = description;
-        }
-        void levelMetadata(std::string name, uint32_t ID, bool LDM, bool platformer, bool coin1, bool coin2, bool coin3){
-            levelName = name;
-            levelID = ID;
-
-            bitmask &= 0xFC1F;
-            if(platformer){
+        void configurePlatformer(bool plat){
+            bitmask &= 0xFDFF;
+            if(plat){
                 bitmask |= 0x0200;
             }
-            if(LDM){
-                bitmask |= 0x0100;
-            }
-            if(coin1){
-                bitmask |= 0x0080;
-            }
-            if(coin2){
-                bitmask |= 0x0040;
-            }
-            if(coin3){
-                bitmask |= 0x0020;
-            }
         }
-
-        void botMetadata(std::string name, const SemVer& version){
-            botName = name;
-            botVersion = version;
-        }
-
-        void timeMetadata(uint64_t ms, uint64_t frames){
-            replayTime = ms;
-            totalFrames = frames;
-        }
-
+        
         void configurePhysics(uint8_t mode, uint8_t freq = 1){
             bitmask &= 0x9FFF;
             switch (mode){
@@ -356,65 +304,8 @@ namespace h2o{
             }
             return maxSize;
         }
-
-        void calculateInputCount(){
-            p1InputCount = 0;
-            p2InputCount = 0;
-            for(const auto& i : playerInputs){
-                switch (i.input){
-                case static_cast<uint8_t>(InputType::P1JUMPCLICK):
-                    p1InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P1JUMPREL):
-                    p1InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P1LEFTCLICK):
-                    p1InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P1LEFTREL):
-                    p1InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P1RIGHTCLICK): // todo
-                    p1InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P1RIGHTREL):
-                    p1InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P2JUMPCLICK):
-                    p2InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P2JUMPREL):
-                    p2InputCount++;
-                    break;
-                
-                case static_cast<uint8_t>(InputType::P2LEFTCLICK):
-                    p2InputCount++;
-                    break;
-                    
-                    case static_cast<uint8_t>(InputType::P2LEFTREL):
-                    p2InputCount++;
-                    break;
-                    
-                    case static_cast<uint8_t>(InputType::P2RIGHTCLICK):
-                    p2InputCount++;
-                    break;
-                    
-                    case static_cast<uint8_t>(InputType::P2RIGHTREL):
-                    p2InputCount++;
-                    break;
-                }
-            }
-        }
         
-        
-        uint8_t exportFile(){ // no compression for now
+        uint8_t exportFile(std::string macroName){ // no compression for now
             std::filesystem::path fileName = macroName + ".hydro";
             std::filesystem::path directory = "hydro";
             
@@ -468,11 +359,7 @@ namespace h2o{
             << magicNumber[0] << magicNumber[1] << magicNumber[2] << magicNumber[3] << magicNumber[4] << magicNumber[5]
             << hydroVersion.major << hydroVersion.minor << hydroVersion.patch
             << util::crc32(macroStream.data())
-            << macroName << macroCreator << macroDescription
-            << gameVersion << botName
-            << botVersion.major << botVersion.minor << botVersion.patch << botVersion.prNote
-            << levelName << levelID << replayTime << totalFrames << deathCount
-            << p1InputCount << p2InputCount << bitmask;
+            << bitmask;
             
             // write header and macro streams
             outFile.write(reinterpret_cast<const char*>(headerStream.data().data()),headerStream.data().size());
@@ -512,76 +399,6 @@ namespace h2o{
             }
             
             uint32_t crc32 = readFile.readBits(32);
-
-            while(true){
-                char temp = readFile.readBits(8);
-                if(temp == '\0'){
-                    break;
-                }else{
-                    macroName += temp;
-                }
-            }
-
-            while(true){
-                char temp = readFile.readBits(8);
-                if(temp == '\0'){
-                    break;
-                }else{
-                    macroCreator += temp;
-                }
-            }
-
-            while(true){
-                char temp = readFile.readBits(8);
-                if(temp == '\0'){
-                    break;
-                }else{
-                    macroDescription += temp;
-                }
-            }
-
-            gameVersion = readFile.readBits(32);
-
-            while(true){
-                char temp = readFile.readBits(8);
-                if(temp == '\0'){
-                    break;
-                }else{
-                    botName += temp;
-                }
-            }
-
-            botVersion.major = readFile.readBits(16);
-            botVersion.minor = readFile.readBits(16);
-            botVersion.patch = readFile.readBits(16);
-
-            while(true){
-                char temp = readFile.readBits(8);
-                if(temp == '\0'){
-                    break;
-                }else{
-                    botVersion.prNote += temp;
-                }
-            }
-
-            while(true){
-                char temp = readFile.readBits(8);
-                if(temp == '\0'){
-                    break;
-                }else{
-                    levelName += temp;
-                }
-            }
-
-            levelID = readFile.readBits(32);
-
-            replayTime = readFile.readBits(64);
-            totalFrames = readFile.readBits(64);
-
-            deathCount = readFile.readBits(32);
-
-            p1InputCount = readFile.readBits(32);
-            p2InputCount = readFile.readBits(32);
 
             bitmask = readFile.readBits(16);
 
@@ -719,19 +536,6 @@ namespace h2o{
         }
 
         // getters
-        std::string viewMacroName(){ return macroName; }
-        std::string viewMacroCreator(){ return macroCreator; }
-        std::string viewMacroDescription(){ return macroDescription; }
-        uint32_t viewGameVersion(){ return gameVersion; }
-        std::string viewBotName(){ return botName; }
-        SemVer viewBotVersion(){ return botVersion; }
-        std::string viewLevelName(){ return levelName; }
-        uint32_t viewLevelID(){ return levelID; }
-        uint64_t viewReplayTime(){ return replayTime; }
-        uint64_t viewTotalFrames(){ return totalFrames; }
-        uint32_t viewDeathCount(){ return deathCount; }
-        uint32_t viewP1InputCount(){ return p1InputCount; }
-        uint32_t viewP2InputCount(){ return p2InputCount; }
         uint16_t viewBitmask(){ return bitmask; }
         
         std::vector<int32_t> viewSeeds(){ return seeds; }
