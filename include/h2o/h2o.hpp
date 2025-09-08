@@ -429,6 +429,11 @@ namespace h2o{
             // store macro data block
             util::BitWriter macroStream;
             
+            macroStream << static_cast<uint32_t>(seeds.size());
+            for(const auto& i : seeds){
+                macroStream << i;
+            }
+            
             macroStream << static_cast<uint32_t>(tps.size());
             for(const auto& i : tps){
                 macroStream << i;
@@ -583,8 +588,13 @@ namespace h2o{
             uint8_t deltaSize = (((bitmask & 0x1C00) >> 10) + 1) << 2;
             uint8_t inputSize = ((bitmask & 0x0200) >> 9) + 3;
 
-            tps.pop_back(); // remove initial zero
             uint32_t temp = readFile.readBits(32);
+            for(uint32_t i = 0; i < temp; i++){
+                seeds.emplace_back(readFile.readBits(32));
+            }
+
+            tps.pop_back(); // remove initial zero
+            temp = readFile.readBits(32);
             for(uint32_t i = 0; i < temp; i++){
                 double tickRate = readFile.readDouble();
                 tps.emplace_back(tickRate);
